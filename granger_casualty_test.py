@@ -1,7 +1,5 @@
 import pandas as pd
 from statsmodels.tsa.stattools import grangercausalitytests
-import tkinter as tk
-from tkinter import filedialog, simpledialog
 import sys
 import io
 
@@ -44,31 +42,3 @@ def perform_granger_test(df1, df2, maxlag, test='ssr_chi2test'):
     print('Granger Causality Test results saved to granger_test_results.csv')
 
     return pd.DataFrame(results, index=['Min p-value']).transpose()
-
-
-
-def main():
-    # Initialize tkinter - we won't be using the root window but we need it to create the file dialog
-    root = tk.Tk()
-    # Hide the main window because we only want to show the file dialog
-    root.withdraw()
-
-    # Open a file dialog and get the selected file's paths
-    file_path1 = filedialog.askopenfilename(filetypes=[("CSV files", "*.csv")])
-    file_path2 = filedialog.askopenfilename(filetypes=[("CSV files", "*.csv")])
-
-    # Read the CSV files into DataFrames
-    df1 = pd.read_csv(file_path1, index_col=0)
-    df2 = pd.read_csv(file_path2, index_col=0)
-
-    # Ask the user for the maximum lag
-    maxlag = simpledialog.askinteger("Input", "Enter maximum lag", parent=root)
-
-    # Perform the Granger Causality Test and get the results
-    results_df = perform_granger_test(df1, df2, maxlag)
-
-    print("All granger results saved")
-
-
-if __name__ == "__main__":
-    main()
