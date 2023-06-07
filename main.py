@@ -1,29 +1,37 @@
-import pandas as pd
-from statsmodels.tsa.stattools import adfuller
+import tkinter as tk
+from tkinter import filedialog
+import os
+from adf_module import perform_adf_test
 
-# Set the number of columns to display
-pd.set_option("display.max_columns", None)
 
-# Read the CSV file into a DataFrame, skipping the header row
-data = pd.read_csv("fc01cc01-9242-48c6-a082-729ff3de007a_Series - Metadata.csv", skiprows=1)
+def main():
+    # Initialize tkinter - we won't be using the root window but we need it to create the file dialog
+    root = tk.Tk()
+    # Hide the main window because we only want to show the file dialog
+    root.withdraw()
 
-# Transpose the DataFrame
-data = data.T
+    # Open a file dialog and get the selected file's path
+    file_path = filedialog.askopenfilename(filetypes=[("CSV files", "*.csv")])
 
-# Set the first row as column headers
-data.columns = data.iloc[0]
+    # Perform the ADF test and save the results
+    results_df = perform_adf_test(file_path)
 
-# Remove the first row (header row)
-data = data[1:]
+    # Get the file name without the directory
+    file_name = os.path.basename(file_path)
+    # Remove the extension
+    base_name = file_name.rsplit('.', 1)[0]
 
-# Perform the ADF test for each series
-for column in data.columns:
-    series = pd.to_numeric(data[column], errors='coerce')
-    result = adfuller(series.dropna())
-    print("Series:", column)
-    print("ADF Statistic:", result[0])
-    print("p-value:", result[1])
-    print("Critical Values:")
-    for key, value in result[4].items():
-        print(f"\t{key}: {value}")
-        print()
+    # Define output file name and add the "results" directory to the path
+    output_file_path = "results/" + base_name + "_adf_test_results.csv"
+
+    # Create the results directory if it doesn't exist
+    os.makedirs(os.path.dirname(output_file_path), exist_ok=True)
+
+    # Save the DataFrame to a CSV file
+    results_df.to_csv(output_file_path, index=False)
+
+    print("ADF test results saved to", output_file_path)
+
+
+if __name__ == "__main__":
+    main()
